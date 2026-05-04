@@ -1,10 +1,12 @@
 "use client";
+import { Suspense } from "react";
 import Navbar from "../../components/Navbar";
 import ProductCard from "../../components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
-export default function CollectionPage() {
+// 1. Logic aur UI ke liye alag component banaya
+function CollectionContent() {
   const searchParams = useSearchParams();
   const searchBarQuery = searchParams.get("search") || "";
 
@@ -17,57 +19,68 @@ export default function CollectionPage() {
     { id: "orion", title: "Orion Spot", price: "₹3,500", image: "/images/products/Foco de techo Sean, 4 luces, negro de Orion.jpg" },
   ];
 
-  // Logic: Search Query ke base par filter
   const filteredProducts = allProducts.filter((product) =>
     product.title.toLowerCase().includes(searchBarQuery.toLowerCase())
   );
 
   return (
+    <div className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="mb-20"
+      >
+        <span className="text-blue-500 font-bold tracking-[0.4em] uppercase text-[10px]">Indore Signature Series</span>
+        <h1 className="text-7xl font-black tracking-tighter mt-4 italic uppercase">
+          Our <span className="text-blue-500 underline decoration-blue-500/20 underline-offset-8">Designs</span>
+        </h1>
+        {searchBarQuery && (
+          <p className="mt-4 text-zinc-400 text-sm">Showing results for: <span className="text-white italic">"{searchBarQuery}"</span></p>
+        )}
+      </motion.div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+        <AnimatePresence mode="popLayout">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((p) => (
+              <motion.div
+                key={p.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ProductCard title={p.title} price={p.price} image={p.image} />
+              </motion.div>
+            ))
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="col-span-full py-20 text-center"
+            >
+              <h2 className="text-2xl font-bold text-zinc-800 uppercase tracking-[0.3em]">No Products Found</h2>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+// 2. Main Page component jo Suspense use karega (Build Fix)
+export default function CollectionPage() {
+  return (
     <main className="min-h-screen bg-[#050505] text-white">
       <Navbar />
-      <div className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="mb-20"
-        >
-          <span className="text-blue-500 font-bold tracking-[0.4em] uppercase text-[10px]">Indore Signature Series</span>
-          <h1 className="text-7xl font-black tracking-tighter mt-4 italic uppercase">
-            Our <span className="text-blue-500 underline decoration-blue-500/20 underline-offset-8">Designs</span>
-          </h1>
-          {searchBarQuery && (
-            <p className="mt-4 text-zinc-400 text-sm">Showing results for: <span className="text-white italic">"{searchBarQuery}"</span></p>
-          )}
-        </motion.div>
-
-        {/* Bento Grid with Filtered Results */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((p) => (
-                <motion.div
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ProductCard title={p.title} price={p.price} image={p.image} />
-                </motion.div>
-              ))
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                className="col-span-full py-20 text-center"
-              >
-                <h2 className="text-2xl font-bold text-zinc-800 uppercase tracking-[0.3em]">No Products Found</h2>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-blue-500 font-bold animate-pulse uppercase tracking-widest">Loading Collection...</p>
         </div>
-      </div>
+      }>
+        <CollectionContent />
+      </Suspense>
     </main>
   );
 }
