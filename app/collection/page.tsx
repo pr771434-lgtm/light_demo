@@ -5,7 +5,6 @@ import ProductCard from "../../components/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
-// 1. Logic aur UI ke liye alag component banaya
 function CollectionContent() {
   const searchParams = useSearchParams();
   const searchBarQuery = searchParams.get("search") || "";
@@ -24,22 +23,28 @@ function CollectionContent() {
   );
 
   return (
-    <div className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
+    <div className="pt-24 md:pt-40 pb-10 md:pb-20 px-4 md:px-6 max-w-7xl mx-auto overflow-x-hidden">
+      {/* Header Section - Responsive Sizes */}
       <motion.div 
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="mb-20"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-10 md:mb-20 text-center md:text-left"
       >
-        <span className="text-blue-500 font-bold tracking-[0.4em] uppercase text-[10px]">Indore Signature Series</span>
-        <h1 className="text-7xl font-black tracking-tighter mt-4 italic uppercase">
-          Our <span className="text-blue-500 underline decoration-blue-500/20 underline-offset-8">Designs</span>
+        <span className="text-blue-500 font-bold tracking-[0.2em] md:tracking-[0.4em] uppercase text-[9px] md:text-[10px]">
+          Indore Signature Series
+        </span>
+        <h1 className="text-4xl md:text-7xl font-black tracking-tighter mt-2 md:mt-4 italic uppercase leading-none">
+          Our <span className="text-blue-500 underline decoration-blue-500/20 underline-offset-4 md:underline-offset-8">Designs</span>
         </h1>
         {searchBarQuery && (
-          <p className="mt-4 text-zinc-400 text-sm">Showing results for: <span className="text-white italic">"{searchBarQuery}"</span></p>
+          <p className="mt-4 text-zinc-400 text-xs md:text-sm">
+            Showing results for: <span className="text-white italic">"{searchBarQuery}"</span>
+          </p>
         )}
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+      {/* Grid - 2 Columns on Mobile, 3 on Desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-12">
         <AnimatePresence mode="popLayout">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((p) => (
@@ -60,7 +65,7 @@ function CollectionContent() {
               animate={{ opacity: 1 }} 
               className="col-span-full py-20 text-center"
             >
-              <h2 className="text-2xl font-bold text-zinc-800 uppercase tracking-[0.3em]">No Products Found</h2>
+              <h2 className="text-lg md:text-2xl font-bold text-zinc-800 uppercase tracking-[0.2em]">No Products Found</h2>
             </motion.div>
           )}
         </AnimatePresence>
@@ -69,14 +74,13 @@ function CollectionContent() {
   );
 }
 
-// 2. Main Page component jo Suspense use karega (Build Fix)
 export default function CollectionPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white">
       <Navbar />
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <p className="text-blue-500 font-bold animate-pulse uppercase tracking-widest">Loading Collection...</p>
+          <p className="text-blue-500 font-bold animate-pulse uppercase tracking-widest text-xs">Loading Collection...</p>
         </div>
       }>
         <CollectionContent />
